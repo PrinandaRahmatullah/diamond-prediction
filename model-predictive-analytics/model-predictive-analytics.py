@@ -9,10 +9,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error, accuracy_score
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import f1_score, confusion_matrix
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -47,7 +46,7 @@ label_column = [column for column in list(
 label_column
 
 # %% [markdown]
-# ### Clear Null Data
+# ### Clear Null Data dan Zero Value
 
 # %%
 train_df.isna().sum()
@@ -122,7 +121,7 @@ sns.heatmap(
 # 3. Primary camera megapixel (pc) has medium affects to Front camera mega pixel (fc) with correlation 0.6
 # 4. Three G (three_g) has medium affects to four G (four_g) with correlation 0.6
 # 5. Pixel width (px_width) has medium affects to pixel height (px_height) with correlation 0.5
-# 6. Scree width (px_width) has medium affects to screen height (px_height) with correlation 0.5
+# 6. Screen width (px_width) has medium affects to screen height (px_height) with correlation 0.5
 
 # %% [markdown]
 # # Model Development
@@ -137,44 +136,6 @@ sns.heatmap(
 X = train_df.drop("price_range", axis=1)
 y = train_df["price_range"]
 X_test = test_df
-
-# %% [markdown]
-# ### Stardize Data
-#
-
-# %%
-
-# %% [markdown]
-# #### MinMax Scaler
-
-# %%
-min_max_scaler = MinMaxScaler()
-min_max_scaler.fit(X)
-
-min_max_scaled_X_df = pd.DataFrame(
-    min_max_scaler.transform(X), columns=X.columns)
-min_max_scaled_X_df
-
-# %%
-min_max_scaled_X_test_df = pd.DataFrame(
-    min_max_scaler.transform(X_test), columns=X_test.columns)
-min_max_scaled_X_test_df
-
-# %% [markdown]
-# #### Standard Scaler
-
-# %%
-standard_scaler = StandardScaler()
-standard_scaler.fit(X)
-
-standard_scaled_X_df = pd.DataFrame(
-    standard_scaler.transform(X), columns=X.columns)
-standard_scaled_X_df
-
-# %%
-standard_scaled_X_test_df = pd.DataFrame(
-    standard_scaler.fit_transform(X_test), columns=X_test.columns)
-standard_scaled_X_test_df
 
 # %% [markdown]
 # ### Split Data
@@ -195,8 +156,11 @@ len(y_train), len(y_val)
 # ## Model
 
 # %%
+
+
+# %%
 # Siapkan dataframe untuk analisis model
-models = pd.DataFrame(index=['val_mse', 'val_acc'],
+models = pd.DataFrame(index=['val_f1_score'],
                       columns=['KNN', 'RandomForest', 'Boosting'])
 models
 
@@ -207,8 +171,7 @@ models
 
 # %%
 # Find best k of KNN
-acc = []
-error_rate = []
+f_score = []
 
 for i in range(1, 40):
     knn = KNeighborsRegressor(n_neighbors=i)
@@ -216,33 +179,29 @@ for i in range(1, 40):
 
     y_val_pred = [round(x) for x in knn.predict(X_val)]
 
-    error_rate.append(mean_squared_error(y_pred=y_val_pred, y_true=y_val))
-    acc.append(accuracy_score(y_val_pred, y_val))
+    f_score.append(f1_score(y_pred=y_val_pred,
+                   y_true=y_val, average="weighted"))
 
 # %%
 # plot error
 plt.figure(figsize=(10, 6))
-plt.plot(range(1, 40), error_rate, color='blue', linestyle='dashed',
+plt.plot(range(1, 40), f_score, color='blue', linestyle='dashed',
          marker='o', markerfacecolor='red', markersize=10)
-plt.title('Error Rate vs. K Value')
+plt.title('F1-score vs. K Value')
 plt.xlabel('K')
-plt.ylabel('Error Rate')
-print("Minimum error:-", min(error_rate), "at K =",
-      error_rate.index(min(error_rate))+1)
+plt.ylabel('F1-score')
+print("Maximum F1-Score:", max(f_score),
+      "at K =", f_score.index(max(f_score))+1)
 
 # %%
-# plot accuracy
-plt.figure(figsize=(10, 6))
-plt.plot(range(1, 40), acc, color='blue', linestyle='dashed',
-         marker='o', markerfacecolor='red', markersize=10)
-plt.title('accuracy vs. K Value')
-plt.xlabel('K')
-plt.ylabel('Accuracy')
-print("Maximum accuracy:-", max(acc), "at K =", acc.index(max(acc))+1)
+knn = KNeighborsRegressor(n_neighbors=21)
+knn.fit(X_train, y_train)
+
+y_val_pred = [round(x) for x in knn.predict(X_val)]
+confusion_matrix(y_val_pred, y_val)
 
 # %%
-models.loc['val_mse', 'KNN'] = error_rate[20]
-models.loc['val_acc', 'KNN'] = acc[20]
+models.loc['val_f1_score', 'KNN'] = max(f_score)
 
 # %% [markdown]
 # ### RandomForest
@@ -251,45 +210,40 @@ models.loc['val_acc', 'KNN'] = acc[20]
 # Impor library yang dibutuhkan
 
 # %%
-acc = []
-error_rate = []
+f_score = []
 
 # FInd best estimator
-for estimator in range(25, 1000, 25):
+for estimator in range(5, 200, 5):
     RF = RandomForestRegressor(
         n_estimators=estimator, max_depth=8, random_state=55, n_jobs=-1)
     RF.fit(X_train, y_train)
 
     y_val_pred = [round(x) for x in RF.predict(X_val)]
 
-    error_rate.append(mean_squared_error(y_pred=y_val_pred, y_true=y_val))
-    acc.append(accuracy_score(y_val_pred, y_val))
+    f_score.append(f1_score(y_pred=y_val_pred,
+                   y_true=y_val, average="weighted"))
 
 # %%
 # plot error
 plt.figure(figsize=(10, 6))
-plt.plot(range(1, 40), error_rate, color='blue', linestyle='dashed',
+plt.plot(range(5, 200, 5), f_score, color='blue', linestyle='dashed',
          marker='o', markerfacecolor='red', markersize=10)
-plt.title('Error Rate vs. N Estimator * 25')
-plt.xlabel('N Estimator * 25')
-plt.ylabel('Error Rate')
-print("Minimum error:-", min(error_rate), "at N Estimator = ",
-      error_rate.index(min(error_rate))+1, "x 25")
+plt.title('F1-Score vs. N Estimator * 5')
+plt.xlabel('N Estimator * 5')
+plt.ylabel('F1-Score')
+print("Maximum F1-score:", max(f_score), "at N Estimator = ",
+      (f_score.index(max(f_score))+1)*5,)
 
 # %%
-# plot accuracy
-plt.figure(figsize=(10, 6))
-plt.plot(range(1, 40), acc, color='blue', linestyle='dashed',
-         marker='o', markerfacecolor='red', markersize=10)
-plt.title('accuracy vs. N Estimator * 25')
-plt.xlabel('N Estimator * 25')
-plt.ylabel('Accuracy')
-print("Maximum accuracy:-", max(acc),
-      "at N Estimator =", acc.index(max(acc))+1, "x 25")
+RF = RandomForestRegressor(n_estimators=(f_score.index(
+    max(f_score))+1)*5, max_depth=8, random_state=55, n_jobs=-1)
+RF.fit(X_train, y_train)
+
+y_val_pred = [round(x) for x in RF.predict(X_val)]
+confusion_matrix(y_val_pred, y_val)
 
 # %%
-models.loc['val_mse', 'RandomForest'] = error_rate[3]
-models.loc['val_acc', 'RandomForest'] = acc[3]
+models.loc['val_f1_score', 'RandomForest'] = max(f_score)
 
 # %% [markdown]
 # ### Boosting
@@ -302,8 +256,8 @@ models.loc['val_acc', 'RandomForest'] = acc[3]
 dtclf = DecisionTreeClassifier(max_depth=1, criterion='gini', random_state=1)
 dtclf.fit(X_train, y_train)
 
-dtclf_train_sc = accuracy_score(y_train, dtclf.predict(X_train))
-dtclf_val_sc = accuracy_score(y_val, dtclf.predict(X_val))
+dtclf_train_sc = f1_score(y_train, dtclf.predict(X_train), average="weighted")
+dtclf_val_sc = f1_score(y_val, dtclf.predict(X_val), average="weighted")
 print('Decision tree train/val accuracies %.3f/%.3f' %
       (dtclf_train_sc, dtclf_val_sc))
 
@@ -322,8 +276,7 @@ gs.fit(X_train, y_train)
 print("Optimal hyperparameter combination:", gs.best_params_)
 
 y_val_pred = gs.predict(X_val)
-print(mean_squared_error(y_pred=y_val_pred, y_true=y_val),
-      accuracy_score(y_val_pred, y_val))
+print(f1_score(y_val_pred, y_val, average="weighted"))
 
 # %%
 boosting = AdaBoostClassifier(
@@ -331,16 +284,17 @@ boosting = AdaBoostClassifier(
 boosting.fit(X_train, y_train)
 
 y_val_pred = boosting.predict(X_val)
-print(mean_squared_error(y_pred=y_val_pred, y_true=y_val),
-      accuracy_score(y_val_pred, y_val))
+print(f1_score(y_val_pred, y_val, average="weighted"))
 
 # %%
-models.loc['val_mse', 'Boosting'] = mean_squared_error(
-    y_pred=y_val_pred, y_true=y_val)
-models.loc['val_acc', 'Boosting'] = accuracy_score(y_val_pred, y_val)
+models.loc['val_f1_score', 'Boosting'] = f1_score(
+    y_val_pred, y_val, average="weighted")
 
 # %% [markdown]
 # ## Evaluasi Model
+
+# %% [markdown]
+# https://scikit-learn.org/stable/modules/model_evaluation.html
 
 # %%
 models
@@ -354,16 +308,11 @@ models
 # ## Prediksi Data Test
 
 # %%
-knn = KNeighborsRegressor(n_neighbors=21)
-knn.fit(X_train, y_train)
-
-y_val_pred = [round(x) for x in knn.predict(X_val)]
-print("Accuracy Data Validation : ", round(
-    accuracy_score(y_val_pred, y_val), 2))
+knn_test_pred = [round(x) for x in knn.predict(X_test)]
+rf_test_pred = [round(x) for x in RF.predict(X_test)]
+boosting_test_pred = [round(x) for x in boosting.predict(X_test)]
 
 # %%
-y_test_pred = [round(x) for x in knn.predict(X_test)]
-
-# %%
-test_df["price_range"] = y_test_pred
-test_df
+test_results_df = pd.DataFrame(
+    {"KNN": knn_test_pred, "RandomForest": rf_test_pred, "Boosting": boosting_test_pred})
+test_results_df

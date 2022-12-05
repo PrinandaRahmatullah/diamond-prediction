@@ -1,15 +1,15 @@
-# Submission Pertama : Predictive Analytics dan Model Prediction
+# Laporan Proyek Machine Learning - Prinanda Rahmatullah
 
-## Latar Belakang
+## Domain Proyek
 Dari sumber data yang diperoleh di Kaggle, terdapat konteks yang menceritakan tentang Bob sudah mendirikan perusahan ponselnya sendiri. Dia ingin memberikan persaingan yang sengit terhadap beberapa perusahaan ponsel besar seperti Apple, Samsung, dan lainnya.
 
-## Problem Statements dan Goals
+## Business Understanding
 Bob tidak tau bagaimana cara mengestimasi harga dari ponsel yang dibuat oleh perusahaannya. Di masa saat ini dimana pasar ponsel yang sangat kompetitif,kita tidak bisa menyimpulkan sesuatu secara sederhana. Untuk menyelesaikan perkara ini, dia mengumpulkan data penjualan ponsel dari beberapa perusahaan.
 Bob ingin mengetahui relasi dari fitur-fitur ponsel yang ada dari data yang dia kumpulkan dan hubungan fitur tersebut dengan kelompok harga ponsel. Tetapi, dia tidak terlalu mengerti tentang Machine Learning. Jadi, dia meminta saya selaku ML Engineer lulusan Dicoding Indonesia untuk membantunya mengatasi masalah ini. <br>
 Tujuan utamanya adalah mengetahui fitur-fitur apa saja yang mempengaruhi harga ponsel dan membangun model sederhana untuk memprediksi harga ponsel.<br>
 Solusi yang mungkin menjawab masalah adalah EDA dan Model Supervised Learning seperi KNN, Random Forest, dan lainnya. Model supervised learning akan menggunakan metrics f1-score.
 
-## Exploratory Data Analysis (EDA)
+## Data Understanding
 Sumber data : https://www.kaggle.com/datasets/iabhishekofficial/mobile-price-classification
 
 Data harga ponsel terdiri atas dua file yaitu train.csv dan test.csv. File diload ke dalam masing-masing dataframe. Dataframe train terdiri atas 2000 baris data dan 21 kolom termasuk rentang harga, sedangakan Dataframe test terdiri atas 1000 baris data dan 20 kolom karena data test tidak memiliki kolom rentang harga.
@@ -50,7 +50,7 @@ Pada data asli, price range atau rentang harga ponsel menggunakan data kelompok 
 ![Mobile Phone Price Range](/images/price_range.png "Mobile Phone Price Range")
 
 ### Feature Correlation
-Tujuan yang diinginkan oleh Bob yang pertama adalah melihat fitur ponsel mana yang memiliki hubungan terhadap harga ponsel. Dengan command DataFrame.corr(), kita dapat mengetahui hubungan tersebut seperti yang terdapat pada gambar berikut. Skor korelasi berkisar dari -1 dan 1. Skor yang semakin jauh dari angka 0, semakin kuat hubungan terhadap harga. Jika skor mendekati -1, fitur tersebut memiliki efek terbalik dengan harga. Semakin rendah nilai pada kolom tersebut, semakin tinggilah harga ponsel. Akan tetapi, jika skor mendekati angak 1, fitur tersebut memiliki efek selaras dengan harga. Semakin tinggi nilai pada kolom tersebut, semkain tinggilah harga ponsel. Kemudian jika mendekati 0, kolom tersebut memiliki hubungan yang lemah terhadap harga ponsel. Di sini kita dapat mengetahui bahwa:
+Tujuan pertama yang diinginkan oleh Bob adalah melihat fitur ponsel mana yang memiliki hubungan terhadap harga ponsel. Dengan command DataFrame.corr(), kita dapat mengetahui hubungan tersebut seperti yang terdapat pada gambar berikut. Skor korelasi berkisar dari -1 dan 1. Skor yang semakin jauh dari angka 0, semakin kuat hubungan terhadap harga. Jika skor mendekati -1, fitur tersebut memiliki efek terbalik dengan harga. Semakin rendah nilai pada kolom tersebut, semakin tinggilah harga ponsel. Akan tetapi, jika skor mendekati angak 1, fitur tersebut memiliki efek selaras dengan harga. Semakin tinggi nilai pada kolom tersebut, semkain tinggilah harga ponsel. Kemudian jika mendekati 0, kolom tersebut memiliki hubungan yang lemah terhadap harga ponsel. Di sini kita dapat mengetahui bahwa:
 - Jumlah RAM sangat erat memengaruhi harga ponsel dengan skor korelasi 0.9
 - Battery power, pixel width, and pixel height memliki hubungan yang lemah terhadap harga ponsel dengan skor korelasi antara 0.1 and 0.2
 - Fitur yang lainnya tidak terlihat memiliki hubungan terhadap harga ponsel
@@ -89,5 +89,7 @@ Boosting menggunakan weak classifier kemudian diatur learning rate beserta n-est
 
 ## Evaluation
 Metrics yang digunakan pada kasus ini adalah f1-score. F1-score sendiri merupakan metrics yang dihasilkan dari hubungan beberapa metrics lainnya yaitu precision dan recall yang diperoleh dari perhitungan True Positive, False Positive, dan False Negatif hasil prediksi. Dari ketiga model di atas, F1-score terbaik dihasilkan oleh algoritma KNN yaitu 0.93 pada data validasi.
+<br><br>
+Tujuan pertama sudah diperoleh pada bagian correlation. Kemudian tujuan kedua yaitu mengembangkan model prediksi harga ponsel. Diperoleh KNN sebagai model prediksi harga ponsel terbaik dengan f1-score 0.93. Kita bisa meningkatkan f1-score dengan menambahkan data lagi, riset, dan ujicoba menggunakan algoritma machine learning lainnya. Tetapi, berhubung waktu tidak memadai, KNN bisa dikatakan sudah cukup baik dalam memprediksi harga ponsel.
 
 ## Terima Kasih
