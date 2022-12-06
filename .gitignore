@@ -1,2 +1,5 @@
 .ipynb_checkpoints
 indonlu
+.DS_Store
+__pycache__
+*.zip
