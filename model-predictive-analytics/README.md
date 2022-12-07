@@ -54,7 +54,7 @@ Selanjutnya pada EDA adalah dalam mengecek data null atau kosong menggunakan com
 
 ### Count Each Price Range
 Pada data asli, price range atau rentang harga ponsel menggunakan data kelompok angka. Di sini, saya mengubah data tersebut menjadi nama agar memudahkan pembaca memahaminya. Rentang harga terbagi atas 4 kategori yaitu Cheap 24.8%, Medium 24.8%, Expensive 25.1%, dan Pricey 25.3%. <br>
-![Mobile Phone Price Range](/images/price_range.png "Mobile Phone Price Range")
+![Mobile Phone Price Range](images/price_range.png "Mobile Phone Price Range")
 
 ### Feature Correlation
 Tujuan pertama yang diinginkan oleh Bob adalah melihat fitur ponsel mana yang memiliki hubungan terhadap harga ponsel. Dengan command DataFrame.corr(), kita dapat mengetahui hubungan tersebut seperti yang terdapat pada gambar berikut. Skor korelasi berkisar dari -1 dan 1. Skor yang semakin jauh dari angka 0, semakin kuat hubungan terhadap harga. Jika skor mendekati -1, fitur tersebut memiliki efek terbalik dengan harga. Semakin rendah nilai pada kolom tersebut, semakin tinggilah harga ponsel. Akan tetapi, jika skor mendekati angak 1, fitur tersebut memiliki efek selaras dengan harga. Semakin tinggi nilai pada kolom tersebut, semkain tinggilah harga ponsel. Kemudian jika mendekati 0, kolom tersebut memiliki hubungan yang lemah terhadap harga ponsel. Di sini kita dapat mengetahui bahwa:
