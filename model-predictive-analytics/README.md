@@ -1,12 +1,13 @@
 # Laporan Proyek Machine Learning - Prinanda Rahmatullah
 
 ## Domain Proyek
-Dari sumber data yang diperoleh di Kaggle, terdapat konteks yang menceritakan tentang Bob sudah mendirikan perusahan ponselnya sendiri. Dia ingin memberikan persaingan yang sengit terhadap beberapa perusahaan ponsel besar seperti Apple, Samsung, dan lainnya.
+Dari sumber data yang diperoleh di Kaggle, terdapat konteks yang menceritakan tentang Bob sudah mendirikan perusahan ponselnya sendiri. Dia ingin memberikan persaingan yang sengit terhadap beberapa perusahaan ponsel besar seperti Apple, Samsung, dan lainnya. Bob tidak tau bagaimana cara mengestimasi harga dari ponsel yang dibuat oleh perusahaannya. Di masa saat ini dimana pasar ponsel yang sangat kompetitif,kita tidak bisa menyimpulkan sesuatu secara sederhana. Untuk menyelesaikan perkara ini, dia mengumpulkan data penjualan ponsel dari beberapa perusahaan. Bob juga ingin mengetahui relasi dari fitur-fitur ponsel yang ada dari data yang dia kumpulkan dan hubungan fitur tersebut dengan kelompok harga ponsel. Tetapi, dia tidak terlalu mengerti tentang Machine Learning. Jadi, dia meminta saya selaku ML Engineer lulusan Dicoding Indonesia untuk membantunya mengatasi masalah ini.
 
 ## Business Understanding
 ### Problem Statements
-- Bob tidak tau bagaimana cara mengestimasi harga dari ponsel yang dibuat oleh perusahaannya. Di masa saat ini dimana pasar ponsel yang sangat kompetitif,kita tidak bisa menyimpulkan sesuatu secara sederhana. Untuk menyelesaikan perkara ini, dia mengumpulkan data penjualan ponsel dari beberapa perusahaan.
-- Bob ingin mengetahui relasi dari fitur-fitur ponsel yang ada dari data yang dia kumpulkan dan hubungan fitur tersebut dengan kelompok harga ponsel. Tetapi, dia tidak terlalu mengerti tentang Machine Learning. Jadi, dia meminta saya selaku ML Engineer lulusan Dicoding Indonesia untuk membantunya mengatasi masalah ini.
+- Bagaimana cara mengetahui dan menemukan fitur-fitur apa saja dari data yang dapat mempengaruhi rentang harga ponsel?
+- Apakah ada cara untuk mendapat estimasi rentang harga jual ponsel dari data menggunakan model Machine Learning?
+
 ### Goals
 Tujuan utamanya adalah : 
 - Mengetahui fitur-fitur apa saja yang mempengaruhi rentang harga ponsel.
@@ -95,8 +96,29 @@ Random forest belajar dari data kumpulan pohon yang menjadi hutan. Konsep ini ad
 Boosting menggunakan weak classifier kemudian diatur learning rate beserta n-estimator untuk mencari best performance model. Di sini saya menggunakan GridSearchC Cross Validation untuk menemukan learning rate dan n-estimator terbaik. Diperoleh bahwa learning rate terbaik adalah 0.05 dan n-estimator 42 dengan f1-score 0.73.
 
 ## Evaluation
-Metrics yang digunakan pada kasus ini adalah f1-score. F1-score dipilih karena kasus ini tergolong Categorical Classification. F1-score sendiri merupakan metrics yang dihasilkan dari hubungan beberapa metrics lainnya yaitu precision dan recall yang diperoleh dari perhitungan True Positive, False Positive, dan False Negatif hasil prediksi. Penjelasan detailnya dapat dilihat pada artikel dari scikit-learn https://scikit-learn.org/stable/modules/model_evaluation.html dan jurnal berikut https://www.researchgate.net/publication/226675412_A_Probabilistic_Interpretation_of_Precision_Recall_and_F-Score_with_Implication_for_Evaluation.
+Metrics evaluasi yang digunakan pada kasus ini adalah f1-score. F1-score dipilih karena kasus ini tergolong Categorical Classification. F1-score sendiri merupakan metrics yang dihasilkan dari hubungan beberapa metrics lainnya yaitu precision dan recall yang diperoleh dari perhitungan True Positive, False Positive, dan False Negatif hasil prediksi. Penjelasan detailnya dapat dilihat pada artikel dari scikit-learn https://scikit-learn.org/stable/modules/model_evaluation.html dan jurnal berikut https://www.researchgate.net/publication/226675412_A_Probabilistic_Interpretation_of_Precision_Recall_and_F-Score_with_Implication_for_Evaluation.
 
+### Penjelasan Metrics
+- True positive (TP) adalah banyaknya kategori data aktual suatu kelas A yang benar diprediksi oleh model sebagai kelas A.
+- True negative (TN) adalah banyaknya kategori data aktual suatu kelas A yang benar diprediksi oleh model sebagai bukan kelas A.
+- False positive (FP) adalah banyaknya kategori data aktual bukan kelas A, tetapi diprediksi oleh model sebagai kelas A.
+- False negative (FN) adalah banyaknya kategori data aktual kelas A, tetapi diprediksi oleh model sebagai bukan kelas A.
+Keempat data di atas dapat diketahui dari confusion matrix hasil klasifikasi.<br><br>
+Kemudian, para peneliti mengembangkan suatu metrics yaitu F1-score yang terdiri atas Precision dan Recall dengan tujuan untuk mengetahui seberapa baik persebaran hasil klasifikasi terhadap masing-masing kelas data. Selain hasil masing-masing kelas, F1-score juga dapat mengetahui hasil akhir gabungan seluruh kelas. <br>
+- Precision : 
+    ```python
+    Precision = TP / (TP + FP)
+    ```
+- Recall : 
+     ```python
+    Recall = TP / (TP + FN)
+    ```
+- F1-score :
+     ```python
+    F1 = 2 * (Precision * Recall) / (Precision + Recall)
+    ```
+
+### Hasil
 Tabel Hasil Klasifikasi:
 | Metrics  | KNN  | Random Forest  | Boosting  |
 |---|---|---|---|
