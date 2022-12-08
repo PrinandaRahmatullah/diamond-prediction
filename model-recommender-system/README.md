@@ -69,8 +69,8 @@ Gambar 1.1 Sebaran rating produk
 Load dataset dari file ratings_Beauty.csv ke dalam DataFrame. Di sini dataFrame sudah diload duluan pada tahap EDA.
 
 
-## Modeling
-Pendekatan yang diambil untuk mendapatkan hasil rekomendasi dari data produk kecantikan Amazon yaitu dengan menggunakan produk populer untuk user baru, rumus cosinus, dan pendekatan model SVD.
+## Modeling and Results
+Untuk menjawab problem statement dan goals kedua tentang membantu Amazon untuk mengembangan sistem rekomendasi berdasarkan id produk dari data produk kecantikan Amazon, pendekatan yang diambil yaitu dengan menggunakan produk populer untuk user baru, rumus cosinus, dan pendekatan model SVD.
 
 ### Pendekatan Pertama : User Baru
 User baru pastinya tidak memiliki rekam jejak historis transaksi. Oleh karena itu, kita dapat memberikan rekomendasi kepada mereka berupa produk yang paling populer yaitu produk yang paling banyak dibeli berdasarkan data transaksi penjualan produk kecantikan Amazon. Pada Gambar 1.2 di bawah, kita dapat melihat 30 produk kecantikan paling populer yang dibeli oleh user. 30 Produk inilah yang direkomendasikan kepada user baru dari Amazon.<br><br>
@@ -93,11 +93,15 @@ Fungsi recommendation dari pendekatan cosine similarity akan memproses skor dist
 Model ini berfungsi sebagai dimensionality reduksi linier dengan metransformasi menjadi data singular singular value decomposition (SVD) disebut juga LSA. Estimator ini tidak menengahkan data sebelum menghitung nilai yang akan didekomposisi. Oleh karena itu, model ini dapat bekerja sebaik mungkin pada matriks sparse seperti yang digunakan pada kasus ini. Cara penggunakan model ini dapat dilihat pada laman Scikit-learn berikut https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html serta jurnal berikut yang membahas dekomposisi matrix https://arxiv.org/abs/0909.4061.<br><br>
 Fungsi recommendation dari pendekatan model akan memproses matrix similarity dengan mengembalikan list 10 rekomendasi terbaik.
 
-### Hasil Tes Rekomendasi dari Kedua Model Collaborative Filtering
-Pada tahap ini, kita akan coba temukan rekomendasi dari suatu produk dengan id yaitu 6117036094. Hasil yang diperoleh adalah masing-masing model memberikan jawaban berbeda karena menggunakan cara yang berbeda seperti yang terlihat di bawah ini. 
+### Results
+Pendekatan pertama memberikan rekomendasi kepada user baru berupa produk kecantikan paling populer dari Amazon berhubung user tersebut tidak memiliki riwayat transaksi.
+Kemudian pada tahap ini, kita akan coba temukan rekomendasi dari suatu produk menggunakan model collaborative filtering dari pendekatan kedua yaitu cosine similarity dan model SVD. 
+
+Id produk yang dipakai untuk tes yaitu 6117036094. Hasil yang diperoleh adalah masing-masing model memberikan jawaban berbeda karena menggunakan cara yang berbeda seperti yang terlihat di bawah ini. 
 - Cosine Similarity : 'B000052YQ2', '9790771401', '9790771444', '9790771479', '9790771347', '9790771339', '9790771584', '9790771517', '9790771762', '9790771568'
 - Model SVD : '0733001998', '0762451459', '1304146537', '1304168522', '1304196070', '1304482596', '1304488608', '1304495396', '130451112X', '1304622428'
 
+Pendekatan pertama cocok untuk kondisi bagi user baru dan juga user lama yang telah memiliki riwayat transaksi, sedangkan pendekatan kedua lebih cocok bagi user yang memiliki riwayat produk atau sudah melakukan transaksi. Walaupun begitu, pendekatan kedua ini masih tergolong kuno karena menggunakan sparse matrix yang membutuhkan komputasi yang lumayan besar. Oleh karena itu, dibutuhkan riset mendalam untuk menemukan sistem rekomendasi yang lebih baik lagi.
 
 ## Evaluation
 Metrics evaluasi yang digunakan pada kasus ini adalah Precision seperti yang diuraikan pada forum diskusi Dicoding.
@@ -109,6 +113,8 @@ Metrics evaluasi yang digunakan pada kasus ini adalah Precision seperti yang diu
 - False negative (FN) adalah banyaknya kategori data aktual kelas A, tetapi diprediksi oleh model sebagai bukan kelas A.
 Keempat data di atas dapat diketahui dari confusion matrix. Namun pada kasus ini, Precision dipilih dengan tujuan untuk mengetahui seberapa baik hasil rekomendasi yang sesuai dengan konteks yang dicari. Berikut rumus precision yang digunakan: 
 $$ Precision = {TP \over TP + FP} $$
+
+Metrics di atas akan memberikan informasi performa model ketika hasil prediksi model dapat dibandingkan dengan data rekomendasi aktual dari masing-masing produk. Dikarenakan data produk review ini tidak memberikan data tersebut, kita tidak dapat mengetahui seberapa baik performa dari model yang telah dibangun. Oleh karena itu, ke depannya lebih baik mencari data yang juga menyediakan data rekomendasi aktual atau hasil dari model yang berakurasi sempurna layaknya data aktual.
 
 ## Conclusion
 Dari ketiga pendekatan di atas, kita dapat mengetahui rekomendasi produk yang cocok untuk masing-masing kondisi yaitu produk populer untuk user yang baru join dan produk yang kiranya cocok diberikan ketika user membeli suatu produk
