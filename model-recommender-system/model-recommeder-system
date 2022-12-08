@@ -1,0 +1,243 @@
+# %% [markdown]
+# # Exploratory Data Analysis
+
+# %% [markdown]
+# ## Import Dependencies
+
+# %%
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.decomposition import TruncatedSVD
+import sklearn
+from natsort import index_natsorted
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# %% [markdown]
+# ## Load Data
+
+# %%
+ratings_df = pd.read_csv("data/ratings_Beauty.csv")
+ratings_df
+
+# %%
+ratings_df.info()
+
+# %%
+ratings_df.describe()
+
+# %% [markdown]
+# ### Check Null
+
+# %%
+ratings_df.isna().sum()
+
+# %%
+ratings_df.isnull().sum()
+
+# %% [markdown]
+# ### Total User
+
+# %%
+len(ratings_df.UserId.unique())
+
+# %% [markdown]
+# ### Total Product
+
+# %%
+len(ratings_df.ProductId.unique())
+
+# %% [markdown]
+# ### User Transaction Frequency
+
+# %%
+transation_freq = ratings_df.UserId.value_counts()
+transation_freq.head(10)
+
+# %%
+transation_freq.tail(10)
+
+# %% [markdown]
+# ### Product Rating
+
+# %%
+product_rating = ratings_df.groupby('ProductId').Rating.mean().reset_index()
+product_rating
+
+# %%
+# Average rating of product before rounding
+product_rating.Rating.nunique()
+
+# %%
+# Round rating to 1 float
+product_rating.Rating = product_rating.Rating.apply(lambda x: round(x, 1))
+
+# Average rating of product after rounding
+product_rating.Rating.nunique()
+
+# %%
+# List of group rating after rounding
+group_rating = product_rating.Rating.unique()
+group_rating
+
+# %%
+
+reviews = product_rating.Rating.sort_values(
+    ascending=False).value_counts().reset_index()
+
+# rename reviews column name and datatype
+reviews.columns = ["rating", "score"]
+reviews = reviews.sort_values(by="rating", key=lambda x: np.argsort(
+    index_natsorted(reviews["rating"])), ascending=False).reset_index(drop=True)
+reviews.head()
+
+# %%
+# Good reviews
+round(reviews[reviews.rating >= reviews.rating[10]
+              ].score.sum() / reviews.score.sum(), 2)
+
+# %%
+plt.figure(figsize=(10, 8))
+plt.pie(reviews.score, labels=reviews.rating, autopct='%1.1f%%')
+plt.title("Review Score")
+plt.plot()
+
+# %% [markdown]
+# # Modeling
+
+# %% [markdown]
+# ## Pendekatan Pertama : Berdasarkan Popularitas Produk untuk Pengguna Baru
+
+# %% [markdown]
+# ### Import Dependencies
+
+# %%
+
+# %matplotlib inline
+plt.style.use("ggplot")
+
+
+# %% [markdown]
+# ### Most Popular Product
+
+# %%
+popular_products = pd.DataFrame(
+    ratings_df.groupby('ProductId')['Rating'].count())
+most_popular = popular_products.sort_values('Rating', ascending=False)
+most_popular.head()
+
+# %%
+most_popular.head(30).plot(kind="bar")
+
+# %% [markdown]
+# ## Pendekatan Kedua : Model-based Collaborative Filtering System
+# Berdasarkan riwayat transaksi pengguna dan rating yang diperoleh dari user lain yang membeli item yang
+
+# %%
+# Pivot table will generate too much data, subset the dataframe
+ratings_df_subset = ratings_df.head(10000)
+
+
+# %%
+# Utility Matrix based on products sold and user reviews
+ratings_utility_matrix = ratings_df_subset.pivot_table(
+    values='Rating', index='UserId', columns='ProductId', fill_value=0)
+ratings_utility_matrix.head()
+
+# %%
+ratings_utility_matrix.shape
+
+# %%
+# Transposing the matrix
+
+X = ratings_utility_matrix.T
+X.head()
+
+# %%
+X.shape
+
+# %% [markdown]
+# ### Cosine Similarity
+
+# %%
+
+# Menghitung cosine similarity
+cosine_sim = cosine_similarity(X)
+cosine_sim
+
+# %%
+cosine_sim.shape
+
+# %%
+# Dataframe of cosine_sim variable
+cosine_sim_df = pd.DataFrame(cosine_sim, index=X.index, columns=X.index)
+print('Shape:', cosine_sim_df.shape)
+
+# Melihat similarity matrix pada setiap resto
+cosine_sim_df.sample(5, axis=1).sample(10, axis=0)
+
+# %%
+cosine_sim_df
+
+# %%
+# get recommendation
+
+
+def recommendation_cosine(product_id, k=10):
+    # Range(start, stop, step)
+    index = cosine_sim_df.loc[:, product_id].to_numpy().argpartition(
+        range(-1, -k, -1))
+
+    # Choose the most similar product
+    closest = cosine_sim_df.columns[index[-1:-(k+2):-1]]
+
+    # Drop searched product
+    closest = closest.drop(product_id, errors='ignore')
+    print(list(closest))
+
+# %% [markdown]
+# ### SVD
+
+
+# %%
+# Decomposing the Matrix
+SVD = TruncatedSVD(n_components=10)
+decomposed_matrix = SVD.fit_transform(X)
+decomposed_matrix.shape
+
+# %%
+# Correlation Matrix
+correlation_matrix = np.corrcoef(decomposed_matrix)
+correlation_matrix.shape
+
+# %%
+
+
+def recommendation_svd(product_id):
+    product_names = list(X.index)
+    product_ID = product_names.index(product_id)
+
+    # Correlation of this_product
+    correlation_product_ID = correlation_matrix[product_ID]
+    correlation_product_ID.shape
+
+    Recommend = list(X.index[correlation_product_ID > 0.90])
+
+    # Removes the item already bought by the customer
+    Recommend.remove(product_id)
+
+    print(list(Recommend[:10]))
+
+# %% [markdown]
+# ### Test Recommending top 10 highly correlated products in sequence
+
+
+# %%
+test_product = "6117036094"
+
+# %%
+recommendation_cosine(test_product)
+
+# %%
+recommendation_svd(test_product)
