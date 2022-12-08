@@ -1,8 +1,7 @@
 # Laporan Proyek Machine Learning - Prinanda Rahmatullah
 
 ## Domain Proyek
-Amazon.com is one of the largest electronic commerce and cloud computing companies. Just a few Amazon related facts
-They lost $4.8 million in August 2013, when their website went down for 40 mins. They hold the patent on 1-Click buying, and licenses it to Apple. Their Phoenix fulfilment centre is a massive 1.2 million square feet. Amazon relies heavily on a Recommendation engine that reviews customer ratings and purchase history to recommend items and improve sales.
+Amazon.com adalah salah satu perusahaan perdagangan elektronik dan komputasi awan terbesar. Sedikit fakta terkait Amazon yaitu mereka kehilangan $4,8 juta pada Agustus 2013, ketika situs web mereka mati selama 40 menit. Mereka memegang paten untuk pembelian 1-Klik, dan melisensikannya ke Apple. Pusat pemenuhan Phoenix mereka seluas 1,2 juta kaki persegi. Selain itu, pusat perbelanjaan Amazon sangat bergantung pada mesin Rekomendasi yang meninjau peringkat pelanggan dan riwayat pembelian untuk merekomendasikan barang dan meningkatkan penjualan. Oleh karena itu, CEO meminta saya selaku lulusan Dicoding Indonesia yang bekerja sebagai Data Scientist Amazon untuk menganalisis data rating dan review produk kecantikan, kemudian mengembangkan sistem rekomendasi sederhana untuk mengajarkan mahasiswa S1 yang magang di Amazon Indonesia.
 
 ## Business Understanding
 ### Problem Statements
@@ -42,7 +41,9 @@ Selanjutnya pada EDA adalah dalam mengecek data null atau kosong menggunakan com
 Total user adalah sebanyak 1210271 id user unik dan total produk adalah sebanyak 249274 id produk unik
 
 ### User Transaction Frequency
-Di sini kita dapat mengetahui user mana yang paling banyak melakukan transaksi review atau pembelian produk kecantikan di Amazon. Dengan adanya data ini, pihak Amazon mungkin dapat memberikan bonus atau hadiah terhadap user tersebut. Berikut 10 user dengan transaksi terbanyak
+Di sini kita dapat mengetahui user mana yang paling banyak melakukan transaksi review atau pembelian produk kecantikan di Amazon. Dengan adanya data ini, pihak Amazon mungkin dapat memberikan bonus atau hadiah terhadap user tersebut. Tabel 1 di bawah ini menunjukkan kepada kita tentang user yang melakukan transaksi atau review terbanyak terhadap produk kecantikan di Amazon.
+
+Tabel 1. Frekuensi transaksi user
 | UserId  | Jumlah Transaksi  |
 |---|---|
 | A3KEZLJ59C1JVH |    389 |
@@ -57,8 +58,10 @@ Di sini kita dapat mengetahui user mana yang paling banyak melakukan transaksi r
 | A1RRMZKOMZ2M7J |    225 |
 
 ### Produk Review
-Pada bagian ini, kita dapat mengetahui rata-rata rating review setiap produk dan juga jumlah frekuensi masing-masing rating produk.
+Pada bagian ini, kita dapat mengetahui rata-rata rating review setiap produk dan juga jumlah frekuensi masing-masing rating produk. Gambar 1.1 menunjukkan kepada kita tentang sebaran rating produk yang diberikan oleh user. Terlihat jelas bahwa rating produk 5.0 (sempurna) memiliki jumlah yang paling besar yaitu 38.5% dari total data. Kemudian dengan asumsi produk yang baik adalah produk yang memiliki rating paling kurang 4.0, didapatkan bahwa 73% produk diberikan rating baik oleh user.<br><br>
 ![Sebaran Rating Produk](images/review.png "Sebaran Rating Produk")
+
+Gambar 1.1 Sebaran rating produk
 
 ## Data Preparation
 
@@ -70,23 +73,31 @@ Load dataset dari file ratings_Beauty.csv ke dalam DataFrame. Di sini dataFrame 
 Pendekatan yang diambil untuk mendapatkan hasil rekomendasi dari data produk kecantikan Amazon yaitu dengan menggunakan produk populer untuk user baru, rumus cosinus, dan pendekatan model SVD.
 
 ### Pendekatan Pertama : User Baru
-User baru pastinya tidak memiliki rekam jejak historis transaksi. Oleh karena itu, kita dapat memberikan rekomendasi kepada mereka berupa produk yang paling populer yaitu produk yang paling banyak dibeli berdasarkan data transaksi penjualan produk kecantikan Amazon.<br>
+User baru pastinya tidak memiliki rekam jejak historis transaksi. Oleh karena itu, kita dapat memberikan rekomendasi kepada mereka berupa produk yang paling populer yaitu produk yang paling banyak dibeli berdasarkan data transaksi penjualan produk kecantikan Amazon. Pada Gambar 1.2 di bawah, kita dapat melihat 30 produk kecantikan paling populer yang dibeli oleh user. 30 Produk inilah yang direkomendasikan kepada user baru dari Amazon.<br><br>
 ![Most Popular Produk](images/popular.png "Most Popular Produk")
 
-<!-- TODO -->
+Gambar 1.2 Frekuensi produk terpopuler
+
+
 ### Pendekatan Kedua : Model Based Collaborative Filtering
 Model ini akan merekomendasikan produk kepada user berdasarkan rekam historis transaksi dan kesamaan produk yang dibeli oleh kustomer lainnya. Mulanya data user dan produk dikonversi menjadi matrix utility atau sparse matrix.
 
 #### Cosine Similarity
 Matriks hasil konversi kemudian dihitung kemiripan masing-masing produk terhadap user menggunakan rumus kosinus berikut:
-```python
-Cos(x, y) = x . y / ||x|| * ||y||
-```
-Fungsi recommendation akan memproses skor distance similarity dengan mengembalikan list 10 rekomendasi terbaik.
+$$
+Cos(x, y) = {x * y \over ||x|| * ||y||}
+$$
+Fungsi recommendation dari pendekatan cosine similarity akan memproses skor distance similarity dengan mengembalikan list 10 rekomendasi terbaik.
 
-### Model Truncated SVD
+#### Model Truncated SVD
 Model ini berfungsi sebagai dimensionality reduksi linier dengan metransformasi menjadi data singular singular value decomposition (SVD) disebut juga LSA. Estimator ini tidak menengahkan data sebelum menghitung nilai yang akan didekomposisi. Oleh karena itu, model ini dapat bekerja sebaik mungkin pada matriks sparse seperti yang digunakan pada kasus ini. Cara penggunakan model ini dapat dilihat pada laman Scikit-learn berikut https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html serta jurnal berikut yang membahas dekomposisi matrix https://arxiv.org/abs/0909.4061.<br><br>
-Fungsi recommendation akan memproses hasil dari model dengan mengembalikan list 10 rekomendasi terbaik.
+Fungsi recommendation dari pendekatan model akan memproses matrix similarity dengan mengembalikan list 10 rekomendasi terbaik.
+
+### Hasil Tes Rekomendasi dari Kedua Model Collaborative Filtering
+Pada tahap ini, kita akan coba temukan rekomendasi dari suatu produk dengan id yaitu 6117036094. Hasil yang diperoleh adalah masing-masing model memberikan jawaban berbeda karena menggunakan cara yang berbeda seperti yang terlihat di bawah ini. 
+- Cosine Similarity : 'B000052YQ2', '9790771401', '9790771444', '9790771479', '9790771347', '9790771339', '9790771584', '9790771517', '9790771762', '9790771568'
+- Model SVD : '0733001998', '0762451459', '1304146537', '1304168522', '1304196070', '1304482596', '1304488608', '1304495396', '130451112X', '1304622428'
+
 
 ## Evaluation
 Metrics evaluasi yang digunakan pada kasus ini adalah Precision seperti yang diuraikan pada forum diskusi Dicoding.
@@ -96,17 +107,10 @@ Metrics evaluasi yang digunakan pada kasus ini adalah Precision seperti yang diu
 - True negative (TN) adalah banyaknya kategori data aktual suatu kelas A yang benar diprediksi oleh model sebagai bukan kelas A.
 - False positive (FP) adalah banyaknya kategori data aktual bukan kelas A, tetapi diprediksi oleh model sebagai kelas A.
 - False negative (FN) adalah banyaknya kategori data aktual kelas A, tetapi diprediksi oleh model sebagai bukan kelas A.
-Keempat data di atas dapat diketahui dari confusion matrix. Namun pada kasus ini, Precision dipilih dengan tujuan untuk mengetahui seberapa baik hasil rekomendasi yang sesuai dengan konteks yang dicari. Berikut rumus precision:
-- Precision : 
-    ```python
-    Precision = TP / (TP + FP)
-    ```
+Keempat data di atas dapat diketahui dari confusion matrix. Namun pada kasus ini, Precision dipilih dengan tujuan untuk mengetahui seberapa baik hasil rekomendasi yang sesuai dengan konteks yang dicari. Berikut rumus precision yang digunakan: 
+$$ Precision = {TP \over TP + FP} $$
 
-### Tes Rekomendasi dari Kedua Model Collaborative Filtering
-Di sini, kita coba temukan rekomendasi dari suatu produk yaitu 6117036094. Masing-masing model memberikan jawaban berbeda karena menggunakan cara yang berbeda. 
-- Cosine Similarity : ['B000052YQ2', '9790771401', '9790771444', '9790771479', '9790771347', '9790771339', '9790771584', '9790771517', '9790771762', '9790771568']
-- Model SVD : ['0733001998', '0762451459', '1304146537', '1304168522', '1304196070', '1304482596', '1304488608', '1304495396', '130451112X', '1304622428']
-
+## Conclusion
 Dari ketiga pendekatan di atas, kita dapat mengetahui rekomendasi produk yang cocok untuk masing-masing kondisi yaitu produk populer untuk user yang baru join dan produk yang kiranya cocok diberikan ketika user membeli suatu produk
 <br>
 Tujuan pertama sudah diperoleh pada bagian EDA yaitu mengetahui jumlah user, produk, transaksi user, dan produk review. Kemudian, tujuan kedua yaitu mengembangkan model sederhana rekomendasi menggunakan pendekatan cosine similarity distance dan model Singular Value Decomposition. Kedua pendekatan ini cocok digunakan ketika ukuran sparse matrix tidak terlalu besar.
